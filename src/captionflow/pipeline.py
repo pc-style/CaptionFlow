@@ -63,7 +63,7 @@ def process_single(video_path: Path, options: JobOptions) -> JobResult:
         # 5. Generate captions
         if options.verbose:
             console.print("  Generating subtitles...")
-        captions = generate_captions(response, options.format)
+        captions = generate_captions(response, options.format, diarize=options.diarize)
 
         if not captions or all(not c.strip() for c in captions.values()):
             return JobResult(

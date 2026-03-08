@@ -38,7 +38,10 @@ def transcribe_audio(
         kwargs["diarize"] = True
 
     try:
-        response = client.listen.v1.media.transcribe_file(**kwargs)
+        response = client.listen.v1.media.transcribe_file(
+            **kwargs,
+            request_options={"timeout_in_seconds": 300, "max_retries": 2},
+        )
     except Exception as e:
         raise TranscriptionError(f"DeepGram API error: {e}") from e
 
