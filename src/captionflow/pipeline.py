@@ -92,6 +92,9 @@ def process_single(video_path: Path, options: JobOptions) -> JobResult:
             if srt_path.suffix == ".tmp.srt":
                 srt_path.unlink(missing_ok=True)
 
+            if options.delete_original and embedded_path and embedded_path.exists():
+                video_path.unlink()
+
         elapsed = time.monotonic() - start
         return JobResult(
             input_path=video_path,

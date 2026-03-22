@@ -74,6 +74,7 @@ def doctor() -> None:
 @click.option("-f", "--format", "fmt", type=click.Choice(["srt", "vtt", "both"], case_sensitive=False), default="srt", help="Subtitle output format")
 @click.option("-l", "--language", default="en", help="Language code (e.g., en, es, fr)")
 @click.option("--embed/--no-embed", default=False, help="Embed subtitles into a new video file")
+@click.option("--delete-original", is_flag=True, help="Delete the source video after a successful embedded output is created")
 @click.option("--diarize/--no-diarize", default=False, help="Enable speaker diarization")
 @click.option("-r", "--recursive", is_flag=True, help="Recurse into subdirectories")
 @click.option("--model", default="nova-3", help="DeepGram model")
@@ -87,6 +88,7 @@ def process(
     fmt: str,
     language: str,
     embed: bool,
+    delete_original: bool,
     diarize: bool,
     recursive: bool,
     model: str,
@@ -115,11 +117,16 @@ def process(
         err_console.print(f"[red]Configuration error:[/red] {e}")
         sys.exit(1)
 
+    if delete_original and not embed:
+        err_console.print("[red]Option error:[/red] --delete-original requires --embed")
+        sys.exit(2)
+
     options = JobOptions(
         format=SubtitleFormat(fmt),
         language=language,
         model=model,
         embed=embed,
+        delete_original=delete_original,
         diarize=diarize,
         overwrite=overwrite,
         keep_temp=keep_temp,

@@ -23,6 +23,7 @@ class JobOptions:
     language: str = "en"
     model: str = "nova-3"
     embed: bool = False
+    delete_original: bool = False
     diarize: bool = False
     overwrite: bool = False
     keep_temp: bool = False

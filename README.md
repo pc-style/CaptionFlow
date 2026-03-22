@@ -22,6 +22,9 @@ captionflow process ./videos --recursive --format both
 
 # Embed subtitles into video
 captionflow process video.mp4 --embed --diarize
+
+# Replace originals with captioned outputs
+captionflow process ./videos --recursive --embed --delete-original
 ```
 
 ## Configuration
