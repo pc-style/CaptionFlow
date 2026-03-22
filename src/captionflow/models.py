@@ -24,8 +24,16 @@ class JobOptions:
     model: str = "nova-3"
     embed: bool = False
     delete_original: bool = False
+    skip_existing_embedded: bool = False
+    cleanup_srt: bool = False
+    dry_run: bool = False
+    move_captioned_to: Path | None = None
     diarize: bool = False
     overwrite: bool = False
+    overwrite_subtitles: bool = False
+    overwrite_embedded: bool = False
+    jobs: int = 1
+    summary_report: Path | None = None
     keep_temp: bool = False
     verbose: bool = False
     output_dir: Path | None = None

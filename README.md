@@ -67,8 +67,11 @@ captionflow process interview.mp4 --diarize
 # Replace source after a successful embed
 captionflow process ./clips --recursive --embed --delete-original
 
-# Overwrite existing subtitle files; stop batch on first error
-captionflow process ./videos --overwrite --fail-fast --verbose
+# Control reruns, output placement, and reporting
+captionflow process ./videos --recursive --embed --skip-existing-embedded --cleanup-srt --move-captioned-to ./captioned --jobs 4 --summary-report run.json
+
+# Fine-grained overwrite control
+captionflow process ./videos --overwrite-subtitles --overwrite-embedded --fail-fast --verbose
 ```
 
 ## Configuration
