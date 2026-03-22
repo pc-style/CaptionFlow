@@ -28,14 +28,14 @@ captionflow doctor
 captionflow process path/to/video.mp4
 ```
 
-Subtitles are written next to the source file by default (e.g. `video.srt`). See [docs/cli-reference.md](docs/cli-reference.md) for every flag and behavior.
+Subtitles are written next to the source file by default (e.g. `video.srt`). For the full option surface, resume/reporting workflow, and overwrite behavior, see [docs/cli-reference.md](docs/cli-reference.md) and [docs/pipeline.md](docs/pipeline.md).
 
 ## Documentation
 
 | Doc | Description |
 | --- | ----------- |
-| [docs/cli-reference.md](docs/cli-reference.md) | Commands, options, exit codes, supported containers |
-| [docs/pipeline.md](docs/pipeline.md) | End-to-end flow (probe → extract → transcribe → write/embed) |
+| [docs/cli-reference.md](docs/cli-reference.md) | Commands, options, overwrite modes, exit codes, supported containers |
+| [docs/pipeline.md](docs/pipeline.md) | End-to-end flow, resume/report JSON, retries, dry-run, and parallel jobs |
 
 ## Examples
 
@@ -67,12 +67,34 @@ captionflow process interview.mp4 --diarize
 # Replace source after a successful embed
 captionflow process ./clips --recursive --embed --delete-original
 
-# Control reruns, output placement, and reporting
+# Preview a large batch without writing anything
+captionflow process ./videos --recursive --embed --dry-run --skip-existing-embedded
+
+# Control reruns, output placement, cleanup, and reporting
 captionflow process ./videos --recursive --embed --skip-existing-embedded --cleanup-srt --move-captioned-to ./captioned --jobs 4 --summary-report run.json
 
 # Fine-grained overwrite control
 captionflow process ./videos --overwrite-subtitles --overwrite-embedded --fail-fast --verbose
+
+# Resume a long run using the same summary report
+captionflow process ./videos --recursive --embed --summary-report run.json --jobs 4
 ```
+
+## Recommended Batch Workflow
+
+For long media libraries:
+
+```bash
+captionflow process ./videos \
+  --recursive \
+  --embed \
+  --skip-existing-embedded \
+  --cleanup-srt \
+  --summary-report ./captionflow-run.json \
+  --jobs 4
+```
+
+If the run is interrupted, rerun the same command with the same `--summary-report` path. Previously successful and skipped files are reused from the report; prior failures are retried.
 
 ## Configuration
 
@@ -86,7 +108,7 @@ Tools are resolved from `PATH` (`ffmpeg`, `ffprobe`). Install hints are printed 
 
 ```bash
 uv pip install -e .
-pytest
+uv run --with pytest pytest -q
 ruff check src tests
 ```
 
