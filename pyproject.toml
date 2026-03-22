@@ -8,7 +8,7 @@ license = "MIT"
 dependencies = [
     "click>=8.1",
     "rich>=13.0",
-    "deepgram-sdk>=3.0",
+    "deepgram-sdk>=6.0,<7",
     "deepgram-captions>=1.0",
 ]
 

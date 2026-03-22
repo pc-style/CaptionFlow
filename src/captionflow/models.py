@@ -56,6 +56,9 @@ class JobResult:
     embedded_path: Path | None = None
     error: str | None = None
     duration: float = 0.0
+    deleted_original: bool = False
+    cleaned_subtitles: list[Path] = field(default_factory=list)
+    dry_run: bool = False
 
 
 @dataclass
@@ -65,6 +68,7 @@ class BatchSummary:
     failed: int = 0
     skipped: int = 0
     results: list[JobResult] = field(default_factory=list)
+    report_path: Path | None = None
 
     @property
     def has_failures(self) -> bool:

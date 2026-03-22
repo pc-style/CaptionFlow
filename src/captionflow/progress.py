@@ -9,6 +9,7 @@ from .models import BatchSummary, JobStatus
 def print_summary(summary: BatchSummary, console: Console) -> None:
     """Print a batch processing summary table."""
     console.print()
+    report_path = summary.report_path
 
     if summary.total == 1:
         result = summary.results[0]
@@ -18,10 +19,16 @@ def print_summary(summary: BatchSummary, console: Console) -> None:
                 console.print(f"  Subtitle: {p}")
             if result.embedded_path:
                 console.print(f"  Embedded: {result.embedded_path}")
+            for cleaned in result.cleaned_subtitles:
+                console.print(f"  Removed subtitle: {cleaned}")
+            if result.deleted_original:
+                console.print("  Removed original source video")
         elif result.status == JobStatus.SKIPPED:
             console.print(f"[yellow]Skipped:[/yellow] {result.input_path.name} - {result.error}")
         else:
             console.print(f"[red]Failed:[/red] {result.input_path.name} - {result.error}")
+        if report_path:
+            console.print(f"  Report: {report_path}")
         return
 
     table = Table(title="Batch Summary")
@@ -33,6 +40,8 @@ def print_summary(summary: BatchSummary, console: Console) -> None:
         if result.status == JobStatus.SUCCESS:
             status = "[green]OK[/green]"
             details = ", ".join(p.name for p in result.subtitle_paths)
+            if result.embedded_path:
+                details = ", ".join(part for part in [details, result.embedded_path.name] if part)
         elif result.status == JobStatus.SKIPPED:
             status = "[yellow]SKIP[/yellow]"
             details = result.error or ""
@@ -49,3 +58,5 @@ def print_summary(summary: BatchSummary, console: Console) -> None:
         f"[red]Failed: {summary.failed}[/red]  "
         f"[yellow]Skipped: {summary.skipped}[/yellow]"
     )
+    if report_path:
+        console.print(f"Report: {report_path}")
