@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 from typing import Any
 
@@ -15,6 +16,33 @@ def _strip_speaker_labels(content: str) -> str:
     return re.sub(r"^\[speaker[^\]]*\]\n", "", content, flags=re.MULTILINE)
 
 
+def _normalize_response_data(response: Any) -> dict[str, Any]:
+    """Convert SDK response objects into the dict shape deepgram-captions expects."""
+    if isinstance(response, dict):
+        return response
+
+    # deepgram-sdk v6 response models inherit from pydantic BaseModel.
+    if hasattr(response, "model_dump"):
+        return response.model_dump()
+
+    # Older pydantic-style models may expose dict().
+    if hasattr(response, "dict"):
+        data = response.dict()
+        if isinstance(data, dict):
+            return data
+
+    # Older Deepgram SDK responses expose to_json(); some model types expose json().
+    for method_name in ("to_json", "json"):
+        if hasattr(response, method_name):
+            payload = getattr(response, method_name)()
+            if isinstance(payload, str):
+                return json.loads(payload)
+            if isinstance(payload, dict):
+                return payload
+
+    raise TypeError(f"Unsupported DeepGram response type: {type(response).__name__}")
+
+
 def generate_captions(response: Any, fmt: SubtitleFormat, *, diarize: bool = False) -> dict[str, str]:
     """Generate subtitle content from a DeepGram response.
 
@@ -26,13 +54,7 @@ def generate_captions(response: Any, fmt: SubtitleFormat, *, diarize: bool = Fal
         raise CaptionError("deepgram-captions is not installed") from e
 
     try:
-        # SDK v6 returns Pydantic models; deepgram-captions expects a dict
-        if hasattr(response, "model_dump"):
-            response_data = response.model_dump()
-        elif hasattr(response, "to_json"):
-            response_data = response
-        else:
-            response_data = response
+        response_data = _normalize_response_data(response)
         converter = DeepgramConverter(response_data)
     except Exception as e:
         raise CaptionError(f"Failed to convert DeepGram response: {e}") from e
